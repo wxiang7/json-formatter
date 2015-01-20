@@ -409,12 +409,15 @@
 
         if (msg.type === 'SENDING TEXT') {
           // Try to parse as JSON
-            var obj,
-            text = msg.text ;
+            var obj = msg.obj || undefined,
+            text = msg.text || '';
 
             // Strip any leading garbage, such as a 'while(1);'
-              var strippedText = text.substring( firstJSONCharIndex(text) ) ;
+            var strippedText = text.substring( firstJSONCharIndex(text) ) ;
 
+            if (obj !== undefined) {
+                validJsonText = '';
+            } else {
             try {
               obj = JSON.parse(strippedText) ;
               validJsonText = strippedText ;
@@ -473,6 +476,7 @@
                   
               jsonpFunctionName = firstBit ;
             }
+            }
 
             // If still running, we now have obj, which is valid JSON.
 
@@ -490,10 +494,10 @@
               var html = jsonObjToHTML(obj, jsonpFunctionName) ;
 
             // Post the HTML string to the content script
-              port.postMessage(['FORMATTED', html, validJsonText]) ;
+              port.postMessage(['FORMATTED', html, validJsonText, obj]) ;
 
             // Disconnect
-              port.disconnect() ;
+            // port.disconnect() ;
         }
       });
     });
